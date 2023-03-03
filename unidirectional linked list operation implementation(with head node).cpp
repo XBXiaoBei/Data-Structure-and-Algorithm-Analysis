@@ -14,145 +14,225 @@ typedef struct student
 	double score;
 }ElemType;
 
-typedef struct
+typedef struct Lnode
 {
-	ElemType* data;
-	int listsize;
-	int length;
-}SqList;
+	ElemType data;
+	struct Lnode* next;
+}LNode, * LinkList;
 
-int initSqList(SqList* L, int max)
+int initLinkList1(LinkList* L)
 {
-	L->data = (ElemType*)malloc(sizeof(ElemType));
-	if (L->data == NULL) {
-		printf("空间申请失败！\n");
-		exit(0);
-	}
-	L->listsize = max;
-	L->length = 0;
+	*L = (LinkList)malloc(sizeof(LNode));
+	if (*L == NULL)
+		return 0;
+	(*L)->next = NULL;
 	return 1;
 }
 
-int insertSqList(SqList* L, int i, ElemType X)
+LinkList initLinkList2()
 {
-	if (i < 1 || i > L->length + 1) {
-		printf("插入位置异常\n");
+	LinkList L;
+	L = (LinkList)malloc(sizeof(LNode));
+	if (L == NULL)
+		return NULL;
+	L->next = NULL;
+	return L;
+}
+
+int insertLinkList(LinkList L, int i, ElemType Elem_Insert)
+{
+	LinkList Link_Insert, Link_Primary = L;
+	int site = 0;
+	if (i < 1) {
+		printf("插入位置越下界，插入失败！\n");
 		return 0;
 	}
-	if (L->length >= L->listsize) {
-		printf("容量不够\n");
+	while (Link_Primary != NULL && site < i - 1) {
+		Link_Primary = Link_Primary->next;
+		site++;
+	}
+	if (Link_Primary == NULL) {
+		printf("插入位置越上界，插入失败！\n");
 		return 0;
 	}
-	for (int K = L->length - 1; K > i - 1; K--) {
-		L->data[K + 1] = L->data[K];
-	}
-	L->data[i - 1] = X;
-	L->length++;
+	if (!initLinkList1(&Link_Insert))
+		return 0;
+	Link_Insert->data = Elem_Insert;
+	Link_Insert->next = Link_Primary->next;
+	Link_Primary->next = Link_Insert;
 	return 1;
 }
 
-int deleteSqList(SqList* L, int i, ElemType* Elem_Del)
+int deleteLinkList(LinkList L, int i, ElemType* Elem_Delete)
 {
-	if (L->length == 0) {
-		printf("没有数据，不能删除！\n");
+	LinkList Link_Delete, Link_Primary = L;
+	int site = 0;
+	if (L->next == NULL) {
+		printf("链表为空，删除失败！\n");
 		return 0;
 	}
-	if (i <= 0 || i > L->length) {
-		printf("位置异常，不能删除！\n");
+	if (i < 1) {
+		printf("插入位置越下界，插入失败！\n");
 		return 0;
 	}
-	*Elem_Del = L->data[i - 1];
-	for (int K = i; K < L->length; K++) {
-		L->data[K - 1] = L->data[K];
+	while (Link_Primary->next != NULL && site < i - 1) {
+		Link_Primary = Link_Primary->next;
+		site++;
 	}
-	L->length--;
+	if (Link_Primary->next == NULL) {
+		printf("插入位置越上界，插入失败！\n");
+		return 0;
+	}
+	Link_Delete = Link_Primary->next;
+	Link_Primary->next = Link_Delete->next;
+	*Elem_Delete = Link_Delete->data;
 	return 1;
 }
 
-int updateSqLlist_pointer(SqList L, int i, ElemType Elem_Update)        //顺序表第一个成员是指向数组的指针变量；
+int updateLinkList(LinkList L, int i, ElemType Elem_Update)
 {
-	if (L.length == 0) {
-		printf("没有数据不能更新！\n");
+	LinkList Link_Update;
+	int site = 0;
+	if (L->next == NULL) {
+		printf("链表为空，不能更新！\n");
 		return 0;
 	}
-	if (i < 1 || i > L.length) {
-		printf("位置不合理！\n");
+	if (i < 1) {
+		printf("更新位置越下界，不能更新\n");
 		return 0;
 	}
-	L.data[i - 1] = Elem_Update;
+	Link_Update = L->next;
+	site = 1;
+	while (Link_Update != NULL && site < i) {
+		Link_Update = Link_Update->next;
+		site++;
+	}
+	if (Link_Update == NULL) {
+		printf("更新位置超越上界，不能更新！\n");
+		return 0;
+	}
+	Link_Update->data = Elem_Update;
 	return 1;
 }
 
-int updeteSqList_array(SqList* L, int i, ElemType Elem_Update)        //顺序表类型表中的第一个成员是数组；
+LinkList locationLinkList(LinkList L, char* name)
 {
-	if (L->length == 0) {
-		printf("没有数据不能更新！\n");
-		return 0;
+	LinkList Link_Location = L->next;
+	while (Link_Location) {
+		if (strcmp(Link_Location->data.name, name) != 0)
+			Link_Location = Link_Location->next;
+		else
+			return Link_Location;
 	}
-	if (i < 1 || i > L->length) {
-		printf("位置不合理！\n");
-		return 0;
-	}
-	L->data[i - 1] = Elem_Update;
-	return 1;
+	return NULL;
 }
 
-int locationSqList(SqList L, char* newID)
+void dispLinkList(LinkList L)
 {
-	if (L.length == 0) {
-		printf("没有数据！\n");
-		return 0;
+	LinkList Link_to_Display = L->next;
+	while (Link_to_Display) {
+		printf("%s %7.2f\n", Link_to_Display->data.name, Link_to_Display->data.score);
+		Link_to_Display = Link_to_Display->next;
 	}
-	for (int i = 0; i < L.length; i++) {
-		if (strcmp(L.data[i].name, newID) == 0) {
-			return i + 1;
-		}
-	}
-	return 0;
 }
 
-int dispSqList(SqList L)
+void creatLinkList(LinkList* L)
 {
-	if (L.length == 0) {
-		printf("没有数据！\n");
-		return 0;
-	}
-	for (int i = 0; i < L.length; i++) {
-		printf("%10s, %7.2f\n", L.data[i].name, L.data[i].score);
-	}
-	return 1;
-}
-
-void creatSqList(SqList* L, int maxsize)
-{
-	if (initSqList(L, maxsize))
-		printf("创建成功!\n");
-	else
-		printf("创建不成功!\n");
-	int site_print = 0;
-	ElemType Elem_print;
+	int i = 1;
+	ElemType Elem_Creat;
 	char judge;
+	initLinkList1(L);
 	do {
-		printf("请输入第%d个学生的姓名分数，用空格隔开:", site_print + 1);
-		//下面的scanf,getchar用了a, b, c来就收scanf的返回值;
-		int a = scanf("%s %lf", Elem_print.name, &Elem_print.score);
-		//空读回车，下次正确读入数据；
-		int b = getchar();
-		insertSqList(L, site_print++, Elem_print);
-		printf("继续输入吗？Y/N：");
-		int c = scanf("%c", &judge);
+		printf("请输入第%d个学生的姓名和分数，用空格分开:\n", i);
+		int a = scanf("%s %lf", Elem_Creat.name, &Elem_Creat.score);
+		int c = getchar();
+		insertLinkList(*L, i++, Elem_Creat);
+		printf("继续输入吗?Y/N:");
+		int b = scanf("%c", &judge);
 	} while (judge == 'Y');
+}
+
+int frontcreatLinkList(LinkList* L)
+{
+	ElemType Elem_Creat;
+	LinkList Link_Creat;
+	char judge;
+	int n = 0;
+	initLinkList1(L);
+	do {
+		printf("请输入第%d个学生的姓名和分数，用空格分开:\n", ++n);
+		int a = scanf("%s %lf", Elem_Creat.name, &Elem_Creat.score);
+		int c = getchar();
+		if ((Link_Creat = (LinkList)malloc(sizeof(LNode))) == NULL)
+			return 0;
+		Link_Creat->data = Elem_Creat;
+		Link_Creat->next = NULL;
+		Link_Creat->next = (*L)->next;
+		(*L)->next = Link_Creat;
+		printf("继续输入吗?Y/N:");
+		int b = scanf("%c", &judge);
+	} while (judge == 'Y');
+	return 1;
+}
+
+int rearcreatLinkList(LinkList* L)
+{
+	LinkList Link_Creat, Link_Rear;
+	ElemType Elem_Creat;
+	char judge;
+	int n = 0;
+	initLinkList1(L);
+	Link_Rear = *L;
+	do {
+		printf("请输入第%d个学生的姓名和分数，用空格分开:\n", ++n);
+		int a = scanf("%s %lf", Elem_Creat.name, &Elem_Creat.score);
+		int c = getchar();
+		if ((Link_Creat = (LinkList)malloc(sizeof(LNode))) == NULL)
+			return 0;
+		Link_Creat->data = Elem_Creat;
+		Link_Creat->next = NULL;
+		Link_Rear->next = Link_Creat;
+		Link_Rear = Link_Creat;
+		printf("继续输入吗?Y/N:");
+		int b = scanf("%c", &judge);
+	} while (judge == 'Y');
+	return 1;
+}
+
+void invertLinkList(LinkList L)
+{
+	LinkList Link_Invert, Link_Invert_Next;
+	if (L->next == NULL)
+		return;
+	Link_Invert = L->next;
+	L->next = NULL;
+	while (Link_Invert) {
+		Link_Invert_Next = Link_Invert->next;
+		Link_Invert->next = L->next;
+		L->next = Link_Invert;
+		Link_Invert = Link_Invert_Next;
+	}
+}
+
+void clearLinkList(LinkList L)
+{
+	LinkList Link_Clear;
+	while (L->next) {
+		Link_Clear = L->next;
+		L->next = Link_Clear->next;
+		free(Link_Clear);
+	}
 }
 
 int main()
 {
-	SqList S;
-	ElemType Elem;
-	char name[20] = "xiaoming";
-	creatSqList(&S, 10);//init和insert包含再creat函数里面了；
-	deleteSqList(&S, 4, &Elem);
-	updateSqLlist_pointer(S, 4, Elem);
-	locationSqList(S, name);
-	dispSqList(S);
+	//Init
+	LinkList H;
+	if (initLinkList1(&H))
+		printf("创建成功！\n");
+	else
+		printf("创建不成功\n");
+	LinkList L = initLinkList2();
+	//剩下的与顺序表类似。这里就省略了。
 	return 0;
 }
