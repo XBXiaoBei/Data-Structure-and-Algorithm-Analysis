@@ -23,7 +23,7 @@ typedef struct
 
 int initSqList(SqList* L, int max)
 {
-	L->data = (ElemType*)malloc(sizeof(ElemType));
+	L->data = (ElemType*)malloc(sizeof(max * ElemType));
 	if (L->data == NULL) {
 		printf("空间申请失败！\n");
 		exit(0);
